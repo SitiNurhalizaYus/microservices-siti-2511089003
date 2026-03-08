@@ -1,0 +1,19 @@
+target/
+.idea/
+.vscode/
+*.log
+.DS_Store
+.env
+
+# OS
+Thumbs.db
+
+# IDE
+*.iml
+.classpath
+.project
+.settings/
+
+# Kubernetes Secret berisi kredensial asli - JANGAN pernah commit file ini
+# setelah diisi base64 kredensial Gmail sungguhan
+k8s/02-secret.yaml
