@@ -1,0 +1,19 @@
+# ---- Stage 1: Build ----
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# ---- Stage 2: Run ----
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+
+# curl dibutuhkan untuk healthcheck di docker-compose.yaml
+# (image eclipse-temurin:17-jre tidak menyertakan curl secara default)
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /app/target/product-0.0.1-SNAPSHOT.jar /app/app.jar
+EXPOSE 8083
+ENTRYPOINT ["java", "-jar", "app.jar"]
