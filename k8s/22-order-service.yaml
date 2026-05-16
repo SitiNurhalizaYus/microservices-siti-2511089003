@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: microservices-siti
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      initContainers:
+        - name: wait-for-eureka
+          image: busybox:1.36
+          command: ["sh", "-c", "until nc -z eureka-server 8761; do echo waiting for eureka-server; sleep 3; done"]
+        - name: wait-for-auth-service
+          image: busybox:1.36
+          command: ["sh", "-c", "until nc -z auth-service 8081; do echo waiting for auth-service; sleep 3; done"]
+      containers:
+        - name: order-service
+          image: microservices-siti-order-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: microservices-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              valueFrom:
+                configMapKeyRef:
+                  name: microservices-config
+                  key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+            - name: SPRING_RABBITMQ_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: microservices-config
+                  key: SPRING_RABBITMQ_HOST
+            - name: SPRING_RABBITMQ_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: microservices-config
+                  key: SPRING_RABBITMQ_PORT
+            - name: SPRING_RABBITMQ_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: microservices-config
+                  key: SPRING_RABBITMQ_USERNAME
+            - name: SPRING_RABBITMQ_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: microservices-config
+                  key: SPRING_RABBITMQ_PASSWORD
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql-order:3306/orderdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: ""
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 45
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: microservices-siti
+spec:
+  selector:
+    app: order-service
+  ports:
+    - port: 8082
+      targetPort: 8082
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service-nodeport
+  namespace: microservices-siti
+spec:
+  selector:
+    app: order-service
+  ports:
+    - port: 8082
+      targetPort: 8082
+      nodePort: 30082
+  type: NodePort
