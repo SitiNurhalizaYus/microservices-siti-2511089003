@@ -13,6 +13,7 @@ spec:
       labels:
         app: order-service
     spec:
+# Fix: ganti nslookup dengan nc -z karena nslookup sempat false-negative
       initContainers:
         - name: wait-for-eureka
           image: busybox:1.36
