@@ -33,6 +33,7 @@ public class SecurityConfig {
         "/swagger-ui/**",
         "/swagger-ui.html",
         "/v3/api-docs/**",
+// Fix: actuator/health sempat 403 karena belum di-whitelist
         "/actuator/**"
     ).permitAll()
     .anyRequest().authenticated()
