@@ -1,5 +1,6 @@
 version: '3.8'
-
+# Dokumentasi lengkap arsitektur dan flow API ada di README.md masing-masing service,
+# serta Swagger UI di setiap service pada endpoint /swagger-ui.html
 services:
   # ==================== DATABASE SERVICES ====================
 
