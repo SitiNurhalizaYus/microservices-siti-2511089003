@@ -106,3 +106,6 @@ kubectl delete namespace microservices-siti
 - **PersistentVolumeClaim** dipakai untuk ketiga MySQL agar data tidak hilang saat pod restart.
 - Kredensial database memakai `MYSQL_ALLOW_EMPTY_PASSWORD=yes` (sama seperti di Docker Compose) —
   cocok untuk keperluan akademik/development, **bukan untuk production**.
+
+## Status Project
+Seluruh komponen sudah diuji dan berjalan dengan baik di Docker Compose maupun Kubernetes.
